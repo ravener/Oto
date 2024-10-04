@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=animay
+Exec=/app/lib/io.github.ravener.Oto/Oto %u
+Icon=io.github.ravener.Oto
+Terminal=false
+Type=Application
+Categories=GNOME;GTK;Utility;
+Keywords=osu!;
+StartupNotify=true

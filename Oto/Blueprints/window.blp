@@ -1,0 +1,437 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.ApplicationWindow _root {
+    default-width: 800;
+    default-height: 600;
+    title: "Oto";
+    
+    Box {
+        orientation: vertical;
+
+        Adw.HeaderBar {
+
+            [start]
+            Gtk.Button _runButton {
+                sensitive: false;
+                tooltip-text: "Select the beatmap files to continue.";
+
+                Box {
+                    spacing: 6;
+
+                    Image {
+                        icon-name: "media-playback-start-symbolic";
+                    }
+
+                    Label {
+                        label: "Run";
+                    }
+                }
+
+                styles ["suggested-action"]
+            }
+
+            [end]
+            MenuButton {
+                tooltip-text: _("Main Menu");
+                icon-name: "open-menu-symbolic";
+                menu-model: primary_menu;
+                primary: true;
+            }
+        }
+
+        Adw.ToastOverlay _toastOverlay {
+            Adw.PreferencesPage {
+                Adw.PreferencesGroup {
+                    title: "Beatmap";
+                    description: "Select the beatmap to copy hitsounds.";
+
+                    Adw.ActionRow {
+                        title: "Source";
+                        subtitle: "The Hitsound Difficulty";
+
+                        [suffix]
+                        Gtk.Button _sourceButton {
+                            valign: center;
+
+                            Box {
+                                spacing: 6;
+
+                                Image {
+                                    icon-name: "folder-symbolic";
+                                }
+
+                                Label _sourceLabel {
+                                    label: "(None)";
+                                    ellipsize: middle;
+                                }
+                            }
+                        }
+                    }
+
+                    Adw.ActionRow {
+                        title: "Destination";
+                        subtitle: "The Target Beatmap";
+
+                        [suffix]
+                        Gtk.Button _targetButton {
+                            valign: center;
+
+                            Box {
+                                spacing: 6;
+
+                                Image {
+                                    icon-name: "folder-symbolic";
+                                }
+
+                                Label _targetLabel {
+                                    label: "(None)";
+                                    ellipsize: middle;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Adw.PreferencesGroup {
+                    title: "Options";
+                    description: "Configure copying behavior.";
+
+                    Adw.ActionRow {
+                        title: "Temporal Leniency";
+                        tooltip-text: "This field specifies how many milliseconds two objects can be from eachother while still copying hitsounds. This helps if your beatmaps are not perfectly aligned.";
+
+                        [suffix]
+                        Gtk.SpinButton _temporalLeniency {
+                            valign: center;
+                            digits: 0;
+                            numeric: true;
+                            adjustment: Gtk.Adjustment {
+                                lower: 0;
+                                value: 5;
+                                step-increment: 1;
+                                page-increment: 10;
+                                upper: 99999999;
+                            };
+                            value: 5;
+                        }
+                    }
+
+                    Adw.ActionRow {
+                        title: "Copy Hitsounds";
+                        tooltip-text: "Copy hitsounds from circles, slider heads/repeats/ends, spinner ends, and note heads.";
+
+                        [suffix]
+                        Gtk.Switch _copyHitsounds {
+                            valign: center;
+                            active: true;
+                        }
+                    }
+
+                    Adw.ActionRow {
+                        title: "Copy Sliderbody Hitsounds";
+                        tooltip-text: "Copy hitsounds from sliderbodies.";
+
+                        [suffix]
+                        Gtk.Switch _copySliderbodyHitsounds {
+                            valign: center;
+                            active: true;
+                        }
+                    }
+
+
+                    Adw.ActionRow {
+                        title: "Copy Samplesets";
+                        tooltip-text: "Copy sample sets.";
+
+                        [suffix]
+                        Gtk.Switch _copySamplesets {
+                            valign: center;
+                            active: true;
+                        }
+                    }
+
+
+                    Adw.ActionRow {
+                        title: "Copy Volumes";
+                        tooltip-text: "Copy volumes.";
+
+                        [suffix]
+                        Gtk.Switch _copyVolumes {
+                            valign: center;
+                            active: true;
+                        }
+                    }
+
+
+                    Adw.ActionRow _alwaysPreserve5VolumeRow {
+                        title: "Always Preserve 5% Volume";
+                        tooltip-text: "Objects in the target beatmap with 5% volume will always stay at 5% volume regardless of the copying mode.";
+
+                        [suffix]
+                        Gtk.Switch _alwaysPreserve5Volume {
+                            valign: center;
+                            active: true;
+                        }
+                    }
+
+
+                    Adw.ActionRow {
+                        title: "Copy Storyboarded Samples";
+                        tooltip-text: "Copy sound sample events from the storyboard.";
+
+                        [suffix]
+                        Gtk.Switch _copyStoryboardedSamples {
+                            valign: center;
+                        }
+                    }
+
+
+                    Adw.ActionRow {
+                        title: "Mute Sliderends";
+                        tooltip-text: "Automatically mute slider ends or spinner ends which have no hitsounds in the source beatmap and follow these extra criteria.";
+
+                        [suffix]
+                        Gtk.Switch _muteSliderends {
+                            valign: center;
+                        }
+                    }
+                }
+
+                Adw.PreferencesGroup _sliderendMutingFilter {
+                    title: "Sliderend Muting Filter";
+                    visible: false;
+
+                    Adw.ActionRow {
+                        title: "All Beat Divisors";
+                        tooltip-text: "Input ALL the used beat divisors here.";
+
+                        [suffix]
+                        Button _allBeatDivisorsButton {
+                            valign: center;
+
+                            Box {
+                                spacing: 6;
+
+                                Label {
+                                    label: "Beat divisors";
+                                }
+
+                                Image {
+                                    icon-name: "pan-down-symbolic";
+                                }
+                            }
+                        }
+                    }
+
+                    Adw.ActionRow {
+                        title: "Muted Beat Divisors";
+                        tooltip-text: "Input ALL the mutable beat divisors here.";
+
+                        [suffix]
+                        Button _mutedBeatDivisorsButton {
+                            valign: center;
+
+                            Box {
+                                spacing: 6;
+
+                                Label {
+                                    label: "Beat Divisors";
+                                }
+
+                                Image {
+                                    icon-name: "pan-down-symbolic";
+                                }
+                            }
+                        }
+                    }
+
+                    Adw.ActionRow {
+                        title: "Minimum Duration";
+                        tooltip-text: "Minimum duration of slider in beats to be eligible for sliderend muting. Use this to not accidentally mute kicksliders.";
+
+                        [suffix]
+                        SpinButton _minLength {
+                            valign: center;
+                            numeric: true;
+                            digits: 1;
+                            adjustment: Adjustment {
+                                lower: 0;
+                                upper: 99999999;
+                                step-increment: 0.5;
+                                value: 0.5;
+                            };
+                            value: 0.5;
+                        }
+                    }
+                }
+
+                Adw.PreferencesGroup _mutedConfig {
+                    title: "Muted Config";
+                    visible: false;
+
+                    Adw.ActionRow {
+                        title: "Sample Index";
+
+                        [suffix]
+                        SpinButton _mutedSampleIndex {
+                            valign: center;
+                            numeric: true;
+                            digits: 0;
+                            adjustment: Adjustment {
+                                lower: 0;
+                                upper: 99999;
+                                step-increment: 1;
+                                value: 0;
+                            };
+                            value: 0;
+                        }
+                    }
+
+                    Adw.ActionRow {
+                        title: "Sample Set";
+                        tooltip-text: "Sampleset of the muted sliderend";
+
+                        [suffix]
+                        DropDown _sampleset {
+                            valign: center;
+                            model: samplesets;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+StringList samplesets {
+    strings [
+        "None",
+        "Normal",
+        "Soft",
+        "Drum"
+    ]
+}
+
+menu primary_menu {
+    section {
+        item ("About", "app.about")
+        item ("Quit", "app.quit")
+    }
+}
+
+Gtk.Popover _allBeatDivisorsPopup {
+    Box {
+        orientation: vertical;
+
+        Gtk.CheckButton _all_1_1 {
+            label: "1/1";
+        }
+
+        Gtk.CheckButton _all_1_2 {
+            label: "1/2";
+        }
+
+        Gtk.CheckButton _all_1_3 {
+            label: "1/3";
+        }
+
+        Gtk.CheckButton _all_1_4 {
+            label: "1/4";
+        }
+
+        Gtk.CheckButton _all_1_6 {
+            label: "1/6";
+        }
+
+        Gtk.CheckButton _all_1_8 {
+            label: "1/8";
+        }
+
+        Gtk.CheckButton _all_1_12 {
+            label: "1/12";
+        }
+
+        Gtk.CheckButton _all_1_16 {
+            label: "1/16";
+        }
+
+        Gtk.CheckButton _all_1_5 {
+            label: "1/5";
+        }
+
+        Gtk.CheckButton _all_1_7 {
+            label: "1/7";
+        }
+
+        Gtk.CheckButton _all_1_9 {
+            label: "1/9";
+        }
+
+        Gtk.CheckButton _all_1_11 {
+            label: "1/11";
+        }
+
+        Gtk.CheckButton _all_1_13 {
+            label: "1/13";
+        }
+    }
+}
+
+Gtk.Popover _mutedBeatDivisorsPopup {
+    Box {
+        orientation: vertical;
+
+        Gtk.CheckButton _muted_1_1 {
+            label: "1/1";
+        }
+
+        Gtk.CheckButton _muted_1_2 {
+            label: "1/2";
+        }
+
+        Gtk.CheckButton _muted_1_3 {
+            label: "1/3";
+        }
+
+        Gtk.CheckButton _muted_1_4 {
+            label: "1/4";
+        }
+
+        Gtk.CheckButton _muted_1_6 {
+            label: "1/6";
+        }
+
+        Gtk.CheckButton _muted_1_8 {
+            label: "1/8";
+        }
+
+        Gtk.CheckButton _muted_1_12 {
+            label: "1/12";
+        }
+
+        Gtk.CheckButton _muted_1_16 {
+            label: "1/16";
+        }
+
+        Gtk.CheckButton _muted_1_5 {
+            label: "1/5";
+        }
+
+        Gtk.CheckButton _muted_1_7 {
+            label: "1/7";
+        }
+
+        Gtk.CheckButton _muted_1_9 {
+            label: "1/9";
+        }
+
+        Gtk.CheckButton _muted_1_11 {
+            label: "1/11";
+        }
+
+        Gtk.CheckButton _muted_1_13 {
+            label: "1/13";
+        }
+    }
+}
