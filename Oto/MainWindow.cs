@@ -142,6 +142,11 @@ namespace Oto
         {
         }
 
+        private bool IsFlatpak()
+        {
+            return Environment.GetEnvironmentVariable("FLATPAK_ID") != null || File.Exists("/.flatpak-info");
+        }
+
         private bool OnDrop(Gtk.DropTarget drop, Gtk.DropTarget.DropSignalArgs e)
         {
             var file = new Gio.FileHelper(e.Value.GetObject()!.Handle, false);
@@ -231,8 +236,16 @@ namespace Oto
             var chooser = Gtk.FileChooserNative.New("Save Beatmap", this, Gtk.FileChooserAction.Save, null, null);
             Console.WriteLine(_targetFile!.GetParent()!.GetPath());
             Console.WriteLine(_targetFile!.GetBasename());
-            chooser.SetCurrentFolder(_targetFile!.GetParent()!);
-            chooser.SetCurrentName(_targetFile!.GetBasename()!);
+
+            // Flatpak sandbox gives access to files within /run/user/... directories.
+            // So we do not see the actual path, this code is meant to hint to the user
+            // the same path as original file, so they can quickly save it in the same place.
+            // But this won't work on flatpak so disable it till we find a better way.
+            if (!IsFlatpak())
+            {
+                chooser.SetCurrentFolder(_targetFile!.GetParent()!);
+                chooser.SetCurrentName(_targetFile!.GetBasename()!);
+            }
 
             chooser.OnResponse += async (sender, args) =>
             {
